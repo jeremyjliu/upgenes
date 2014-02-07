@@ -84,6 +84,7 @@ def find_sequence_position(transcript, sequence, genePos, gtf):
 def sequence_substitute(transcript, sequence, genePos, ref, alt, relPos):
 	#relPos = find_sequence_position(transcript, sequence, genePos, gtf)
 	#print(transcript + '\t' + sequence + '\t' + str(genePos) + '\t' + str(relPos) + '\t' + ref)
+	print '\t' + sequence + ' : ' + str(relPos)
 	if not ref == sequence[relPos - 1]:
 		print transcript + '\t' + str(genePos) + '\t' + str(relPos) + '\t' + ref + '\t' + sequence[relPos - 1] + '\t' + alt
 	if len(ref) == 1 and len(alt) == 1:

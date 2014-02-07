@@ -13,7 +13,8 @@ import variants, alignment
 
 # Usage documentation if too few arguments
 if len(sys.argv) < 7:
-	print "Usage: python unitary_variants.py <variant.vcf> <annotation.gtf> <annotation.interval> <annotation.fa> <database.fa> <output.directory>"
+	print "Usage: ./unitary_variants.py <variant.vcf> <annotation.gtf> <annotation.interval> \
+<annotation.fa> <database.fa> <output.directory>"
 	sys.exit(1)
 
 # Dependencies
@@ -43,7 +44,8 @@ annotationFasta = parse_annotation_fa(open(sys.argv[4], 'r'))
 
 # Set up genericMapper pipeline to process input vcf
 print 'Running VAT genericMapper on input vcf file...'
-vatPipe = Popen(['/home2/jjl83/aloft/vat-bin/Linux_x86_64/genericMapper', sys.argv[3], 'unitary_pseudogene'], stdin=inputFile, stdout=PIPE)
+vatPipe = Popen(['/home2/jjl83/aloft/vat-bin/Linux_x86_64/genericMapper', sys.argv[3], 'unitary_pseudogene'], 
+				stdin=inputFile, stdout=PIPE)
 vatOutput = vatPipe.stdout
 
 # Process genericMapper output file, also in vcf format
@@ -65,11 +67,13 @@ for var in vatOutput:
 print 'Calculating alternate sequences...'
 newSeqFile = open(os.path.join(outputPath, basename + '.alternate.fa'), 'w')
 for uniqTranscript, intersect in intersects.iteritems():
-	print var
 	var = intersect[0]
 	transcript = intersect[1]
 	relativePosition = int(var[-1].split('_')[-1])
-	newSequence = sequence_substitute(transcript, annotationFasta[transcript][1], var[1], var[3], var[4], relativePosition)
+	print var
+	print '\t' + str(relativePosition)
+	newSequence = sequence_substitute(transcript, annotationFasta[transcript][1], 
+									var[1], var[3], var[4], relativePosition)
 	#newtranscript = transcript + '_' + var[1]
 	header = annotationFasta[transcript][0]
 	dashes = list_duplicates_of(header, '|')
@@ -79,10 +83,12 @@ newSeqFile.close()
 
 print 'Running FASTX on original sequences...'
 fasta2file(annotationFasta, intersectTranscripts, os.path.join(outputPath, basename + '.original.fa'))
-run_fastx_alignment(os.path.join(outputPath, basename + '.original.fa'), sys.argv[5], os.path.join(outputPath, basename + '.original.fastx'))
+run_fastx_alignment(os.path.join(outputPath, basename + '.original.fa'), sys.argv[5], 
+	                os.path.join(outputPath, basename + '.original.fastx'))
 	
 print 'Running FASTX on alternate sequences...'
-run_fastx_alignment(os.path.join(outputPath, basename + '.alternate.fa'), sys.argv[5], os.path.join(outputPath, basename + '.alternate.fastx'))
+run_fastx_alignment(os.path.join(outputPath, basename + '.alternate.fa'), sys.argv[5], 
+	                os.path.join(outputPath, basename + '.alternate.fastx'))
 
 print 'Reading original FASTX alignments...'
 fastxFile = open(os.path.join(outputPath, basename + '.original.fastx'), 'r')
@@ -99,7 +105,8 @@ outFile = open(os.path.join(outputPath, basename + '.unitary.vcf'), 'w')
 outFile.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n')
 for uniqTranscript in alignAlt.keys():
 	transcript = uniqTranscript[:uniqTranscript.index('_')]
-	commonOutput = ';UT=' + uniqTranscript + ':AQD=' + compute_query_density(alignAlt[uniqTranscript]) + ':ASD=' + compute_subject_density(alignAlt[uniqTranscript])
+	commonOutput = (';UT=' + uniqTranscript + ':AQD=' + compute_query_density(alignAlt[uniqTranscript]) + 
+		            ':ASD=' + compute_subject_density(alignAlt[uniqTranscript]))
 	if not transcript in alignOriginal.keys():
 		outFile.write('\t'.join(intersects[uniqTranscript][0]) + commonOutput + ':CHANGE=No_Original_Hit\n')
 	if find_stop_fs(alignOriginal[transcript]) == True and find_stop_fs(alignAlt[uniqTranscript]) == False:
