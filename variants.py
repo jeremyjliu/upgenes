@@ -1,6 +1,8 @@
-#!/usr/bin/env python
-# <Description>
-# 7/11/2013 - Jeremy Liu
+#!/home2/jjl83/python
+# Auxiliary file that contains key functions use by unitary_mapper.py
+# to process vcf, annotation files, and create alternate sequences.
+# 07/11/2013 - Jeremy Liu (jeremy.liu@yale.edu)
+# 02/07/2014 find_sequence_position obselete by genericMapper
 
 import os, sys
 
@@ -35,9 +37,11 @@ def parse_annotation_gtf(annotationGtf):
 		lineComponents = line.strip().split('\t')
 		key = line.strip().split()[11].rstrip(';').strip('"')
 		if key in gencodeAnnotation.keys():
-			gencodeAnnotation[key].append([lineComponents[0][3:], lineComponents[3], lineComponents[4], lineComponents[6]])
+			gencodeAnnotation[key].append([lineComponents[0][3:], lineComponents[3], 
+				                           lineComponents[4], lineComponents[6]])
 		else:
-			gencodeAnnotation[key] = [[lineComponents[0][3:], lineComponents[3], lineComponents[4], lineComponents[6]]]
+			gencodeAnnotation[key] = [[lineComponents[0][3:], lineComponents[3], 
+			                           lineComponents[4], lineComponents[6]]]
 	return gencodeAnnotation
 	
 # Function to read in gencode annotation fasta file
@@ -62,7 +66,7 @@ def compute_intersect(variantLineComponents, gencodeGtf):
 				return transcript
 	return False
 
-# Function to translate absolute genomic position into relative 1-indexed based sequence position.
+# UNUSED Function to translate absolute genomic position into relative 1-indexed based sequence position.
 def find_sequence_position(transcript, sequence, genePos, gtf):
 	pos = 1
 	if transcript in gtf.keys():

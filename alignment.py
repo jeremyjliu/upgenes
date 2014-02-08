@@ -1,6 +1,8 @@
-#!/usr/bin/env python
-# <Description>
-# 7/11/2013 - Jeremy Liu
+#!/home2/jjl83/python
+# Auxiliary file that contains functions used by unitary_mapper.py to
+# run fastx program, parse fastx alignments and determine alignment comparison
+# statistics.
+# 07/11/2013 - Jeremy Liu (jeremy.liu@yale.edu)
 
 import os, sys, variants
 from subprocess import Popen, PIPE
@@ -78,7 +80,8 @@ def getMatchSequences(infile, list, original):
 
 # Read in FASTX file
 # List element: [calculation items, original lines]
-# Item: [GeneID, TranscriptID, QueryLen, ProteinID, SubjectLen [[Query, Pos, Sequence, Pos][Sbjct, Pos, Sequence, Pos]]...]
+# Item: [GeneID, TranscriptID, QueryLen, ProteinID, SubjectLen 
+#       [[Query, Pos, Sequence, Pos][Sbjct, Pos, Sequence, Pos]]...]
 def parse_alignment(fastxFileFd):
 	fastx = {}
 	while True:
@@ -119,6 +122,7 @@ def fasta2file(fastaDict, transcripts, outPath):
 # Function to run fastx alignment given a fasta file path, db path, and an outpath.
 def run_fastx_alignment(seqsFastaPath, dbFastaPath, outpath):
 	with open(outpath, 'w') as output:
-		fastxPipe = Popen(['/home2/jjl83/fasta-36.3.5d/bin/fastx36', '-m', 'B', seqsFastaPath, dbFastaPath], stdout=output)
+		fastxPipe = Popen(['/home2/jjl83/fasta-36.3.5d/bin/fastx36', '-m', 'B', seqsFastaPath, dbFastaPath],
+		                  stdout=output)
 		fastxPipe.communicate()
 	

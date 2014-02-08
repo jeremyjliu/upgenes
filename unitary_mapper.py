@@ -1,20 +1,20 @@
 #!/home2/jjl83/python
-# Maps variants in vcf file to a gencode interval annotation file (unitary pseudogenes)
-# using VAT genericMapper
+# Maps variants in vcf file to a gencode interval annotation file 
+# (unitary pseudogenes) using VAT genericMapper
 # Creates fasta file of selected sequences, run through FASTX protein alignment.
 # Generates fasta file of alternative sequences, run through FASTX.
 # Two alignments compared for presence of stop and frameshifts.
-# 7/11/2013 - Jeremy Liu
-
-# TO DO: CHANGE TO PURE EXECUTABLE FORMAT
+# 07/11/2013 - Jeremy Liu (jeremy.liu@yale.edu)
+# 02/07/2014 Fully incorperate genericMapper output to avoid manual computing
+#	relative sequence position and correct parsing of transcript
 
 import os, sys, gzip
 import variants, alignment
 
 # Usage documentation if too few arguments
 if len(sys.argv) < 7:
-	print "Usage: ./unitary_variants.py <variant.vcf> <annotation.gtf> <annotation.interval> \
-<annotation.fa> <database.fa> <output.directory>"
+	print "Usage: ./unitary_variants.py <variant.vcf> <annotation.gtf> \
+<annotation.interval> <annotation.fa> <database.fa> <output.directory>"
 	sys.exit(1)
 
 # Dependencies
@@ -68,9 +68,11 @@ print 'Calculating alternate sequences...'
 newSeqFile = open(os.path.join(outputPath, basename + '.alternate.fa'), 'w')
 for uniqTranscript, intersect in intersects.iteritems():
 	var = intersect[0]
-	transcript = intersect[1]
-	relativePosition = int(var[-1].split('_')[-1])
 	print var
+	info = var[-1].split(':')
+	transcript = intersect[1]
+	transcriptIndex = info.index(transcript)
+	relativePosition = int(info[transcriptIndex + 1].split('_')[-1].split('|')[0])
 	print '\t' + str(relativePosition)
 	newSequence = sequence_substitute(transcript, annotationFasta[transcript][1], 
 									var[1], var[3], var[4], relativePosition)
