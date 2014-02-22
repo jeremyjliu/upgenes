@@ -6,15 +6,15 @@
 # Two alignments compared for presence of stop and frameshifts.
 # 07/11/2013 - Jeremy Liu (jeremy.liu@yale.edu)
 # 02/07/2014 Fully incorperate genericMapper output to avoid manual computing
-#	relative sequence position and correct parsing of transcript
+#	relative sequence position and correct parsing of transcript.
 
 import os, sys, gzip
 import variants, alignment
 
 # Usage documentation if too few arguments
 if len(sys.argv) < 7:
-	print "Usage: ./unitary_variants.py <variant.vcf> <annotation.gtf> \
-<annotation.interval> <annotation.fa> <database.fa> <output.directory>"
+	print "Usage: ./unitary_variants.py <variant.vcf> <annotation_gtf> \
+<annotation_interval> <annotation_fa> <database_fa> <output_directory>"
 	sys.exit(1)
 
 # Dependencies
@@ -68,12 +68,22 @@ print 'Calculating alternate sequences...'
 newSeqFile = open(os.path.join(outputPath, basename + '.alternate.fa'), 'w')
 for uniqTranscript, intersect in intersects.iteritems():
 	var = intersect[0]
-	print var
+	#print var
 	info = var[-1].split(':')
 	transcript = intersect[1]
 	transcriptIndex = info.index(transcript)
-	relativePosition = int(info[transcriptIndex + 1].split('_')[-1].split('|')[0])
-	print '\t' + str(relativePosition)
+	transcriptLength = int(info[transcriptIndex + 1].split('_')[0])
+	transcriptGenes = [x for x in info if x.startswith("ENSG")]
+	transcriptStrand = info[info.index(transcriptGenes[0]) + 1]
+	# Make sure to handle ###_###|# case (ENST00000379669.4)
+	noStrandRelPos = int(info[transcriptIndex + 1].split('_')[-1].split('|')[0])
+	if transcriptStrand == '+':
+		relativePosition = noStrandRelPos
+	elif transcriptStrand == '-':
+		relativePosition = transcriptLength - noStrandRelPos + 1
+	else:
+		sys.stderr.write("BAD STRAND:" + transcriptStrand + '\t' + str(var) + '\n')
+	#print '\t' + str(relativePosition)
 	newSequence = sequence_substitute(transcript, annotationFasta[transcript][1], 
 									var[1], var[3], var[4], relativePosition)
 	#newtranscript = transcript + '_' + var[1]
